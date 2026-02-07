@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import _ from 'lodash';
 import parse from './parser.js';
 
 export default function genDiff(filepath1, filepath2) {
@@ -15,5 +16,27 @@ export default function genDiff(filepath1, filepath2) {
   const obj1 = parse(data1, format1);
   const obj2 = parse(data2, format2);
 
-  return JSON.stringify({ obj1, obj2 });
+  const keys = _.sortBy(_.union(Object.keys(obj1), Object.keys(obj2)));
+
+  const lines = keys.map((key) => {
+    if (!Object.hasOwn(obj2, key)) {
+      return `  - ${key}: ${obj1[key]}`;
+    }
+
+    if (!Object.hasOwn(obj1, key)) {
+      return `  + ${key}: ${obj2[key]}`;
+    }
+
+    if (obj1[key] !== obj2[key]) {
+      return [
+        `  - ${key}: ${obj1[key]}`,
+        `  + ${key}: ${obj2[key]}`,
+      ].join('\n');
+    }
+
+    return `    ${key}: ${obj1[key]}`;
+  });
+
+  return `{\n${lines.join('\n')}\n}`;
 }
+
