@@ -37,6 +37,6 @@ export default function genDiff(filepath1, filepath2) {
     return `    ${key}: ${obj1[key]}`;
   });
 
-  return `{\n${lines.join('\n')}\n}`;
+  return `{\n${lines.join('\n')}\n}\n`;
 }
 
